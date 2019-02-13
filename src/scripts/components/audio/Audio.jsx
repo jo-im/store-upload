@@ -17,6 +17,7 @@ import SingleAudioDropzone from "./SingleAudioDropzone";
 import DropstripStore from "../dropstrip/dropstrip-store";
 
 const initialState = {
+  addFallbackAudioElement: false,
   inEditMode: false,
   validTitle: true,
   validContributors: true,
@@ -39,12 +40,19 @@ export default class Audio extends React.Component {
     AudioStore.fetch(this.audioId);
     ContributorStore.addChangeListener(this.populateContributorsSuggestions);
     ContributorStore.get();
+    this.checkAudioContext();
   }
 
   componentWillUnmount() {
     AudioStore.removeChangeListener(this.onChange);
     ContributorStore.removeChangeListener(this.populateContributorsSuggestions);
     this.setState(this.baseState);
+  }
+
+  checkAudioContext() {
+    if (!window.AudioContext && !window.webkitAudioContext) {
+      this.setState({ addFallbackAudioElement: true });
+    }
   }
 
   onChange(changeType) {
@@ -286,7 +294,8 @@ export default class Audio extends React.Component {
                   </div>
                 )}
                 {!this.state.replacing &&
-                  audio.files && (
+                  audio.files &&
+                  !this.state.addFallbackAudioElement && (
                     <div className="row playwave__container">
                       <AudioPlayPause
                         editing={editing}
@@ -304,7 +313,9 @@ export default class Audio extends React.Component {
                           )}
                           {this.state.waveState && (
                             <Wavesurfer
-                              audioFile={audio.files["mp3_128"]}
+                              audioFile={`http://localhost:3000${
+                                audio.files["mp3_128"]
+                              }`}
                               pos={this.state.pos}
                               onPosChange={this.handlePosChange}
                               onFinish={this.handleTogglePlay}
@@ -330,6 +341,13 @@ export default class Audio extends React.Component {
                       </div>
                     </div>
                   )}
+                {this.state.addFallbackAudioElement && (
+                  <audio controls>
+                    <source
+                      src={`http://localhost:3000${audio.files["mp3_128"]}`}
+                    />
+                  </audio>
+                )}
                 <div className="row waveform__timestamp">
                   {this.state.timestamp}
                 </div>
