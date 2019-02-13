@@ -2,6 +2,7 @@
 import React from "react";
 import { render } from "react-dom";
 import { BrowserRouter as Router, Route } from "react-router-dom";
+import { polyfill } from "es6-promise";
 import Header from "./components/Header";
 import StoreManageApp from "./StoreManageApp";
 import resoundAPI from "./services/resound-api";
@@ -16,6 +17,8 @@ Honeybadger.configure({
 });
 
 const auth = resoundAPI.auth;
+
+polyfill();
 
 class Root extends React.Component {
   redirectIfLoggedOut() {
