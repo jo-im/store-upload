@@ -21,15 +21,14 @@ import queryString from "query-string";
 import ColorPicker from "../color-picker/ColorPicker";
 
 const initialState = {
+  accentColor: "#29D5EF",
   addFallbackAudioElement: false,
-  buttonColor: { r: 41, g: 213, b: 239, a: 1 },
   imageUrl: "",
   inEditMode: false,
-  playerColor: { r: 246, g: 246, b: 246, a: 1 },
-  progressColor: { r: 41, g: 213, b: 239, a: 1 },
+  playerColor: "#F6F6F6",
   validTitle: true,
   validContributors: true,
-  waveColor: { r: 0, g: 0, b: 0, a: 0.1 },
+  waveColor: "rgba(0, 0, 0, 0.1)",
   playing: false,
   pos: 0
 };
@@ -60,11 +59,13 @@ export default class Audio extends React.Component {
     this.setState(this.baseState);
   }
 
-  changeColor(element, color) {
-    const { r, g, b, a } = color.rgb;
+  changeColor(element, e) {
+    const color = e.target.value;
+    // const { r, g, b, a } = color.rgb;
     const state = {};
 
-    state[`${element}Color`] = { r, g, b, a };
+    // state[`${element}Color`] = { r, g, b, a };
+    state[`${element}Color`] = color;
 
     this.setState(state);
   }
@@ -231,7 +232,7 @@ export default class Audio extends React.Component {
   updateIframeSrc(audio) {
     const { addFallbackAudioElement, imageUrl } = this.state;
     const { contributors, files, title } = audio;
-    const audioElements = ["button", "player", "progress", "wave"];
+    const audioElements = ["accent", "player", "wave"];
 
     const iframeSrcObj = {
       contributors,
@@ -245,19 +246,37 @@ export default class Audio extends React.Component {
 
     audioElements.forEach(audioElement => {
       const color = this.state[`${audioElement}Color`];
-      const { r, g, b, a } = color;
 
       if (color) {
         if (addFallbackAudioElement) {
-          iframeSrcObj[`${audioElement}Color`] = `rgba(${r}, ${g}, ${b}, ${a})`;
+          iframeSrcObj[`${audioElement}Color`] = color;
         } else {
-          if (audioElement === "wave" || audioElement === "progress") {
-            iframeSrcObj[`${audioElement}Color`] = `rgb(${r}, ${g}, ${b})`;
-            iframeSrcObj[`${audioElement}Opacity`] = a;
+          if (audioElement === "wave" || audioElement === "accent") {
+            if (color.slice(0, 4) === "rgba") {
+              const regExp = /\(([^)]+)\)/;
+              const matches = regExp.exec(color);
+              const rgbaArray = matches[1].split(",");
+              const r = rgbaArray[0];
+              const g = rgbaArray[1];
+              const b = rgbaArray[2];
+              const a = rgbaArray[3];
+
+              if (audioElement === "accent") {
+                iframeSrcObj["progressColor"] = `rgb(${r},${g},${b})`;
+                iframeSrcObj["progressOpacity"] = a;
+                iframeSrcObj["accentColor"] = color;
+              } else {
+                iframeSrcObj[`${audioElement}Color`] = `rgb(${r}, ${g}, ${b})`;
+                iframeSrcObj[`${audioElement}Opacity`] = a;
+              }
+            } else {
+              if (audioElement === "accent") {
+                iframeSrcObj["progressColor"] = color;
+              }
+              iframeSrcObj[`${audioElement}Color`] = color;
+            }
           } else {
-            iframeSrcObj[
-              `${audioElement}Color`
-            ] = `rgba(${r}, ${g}, ${b}, ${a})`;
+            iframeSrcObj[`${audioElement}Color`] = color;
           }
         }
       }
@@ -276,7 +295,7 @@ export default class Audio extends React.Component {
   }
 
   render() {
-    const { audio, buttonColor, playerColor, waveColor } = this.state;
+    const { accentColor, audio, playerColor, waveColor } = this.state;
 
     const editing = this.state.inEditMode;
     const validForm = this.state.validTitle && this.state.validContributors;
@@ -305,9 +324,9 @@ export default class Audio extends React.Component {
     };
 
     const colorElements = [
-      { color: playerColor, title: "Background Color" },
-      { color: buttonColor, title: "Accent Color" },
-      { color: waveColor, title: "Wave Color" }
+      { color: playerColor, element: "player", title: "Background Color" },
+      { color: accentColor, element: "accent", title: "Accent Color" },
+      { color: waveColor, element: "wave", title: "Wave Color" }
     ];
 
     return (
@@ -448,6 +467,7 @@ export default class Audio extends React.Component {
                 <div className="col s10 offset-s2">
                   <EmbedConfig
                     audio={audio}
+                    changeColor={this.changeColor}
                     colorElements={colorElements}
                     updateIframeSrc={this.updateIframeSrc}
                     updateEmbedCode={this.updateEmbedCode}

@@ -61,8 +61,13 @@ class Embed extends Component {
     const { wave } = e.wavesurfer.drawer.canvases[0];
     const { progress } = e.wavesurfer.drawer.canvases[0];
 
-    wave.style.opacity = waveOpacity;
-    progress.style.opacity = progressOpacity;
+    if (waveOpacity) {
+      wave.style.opacity = waveOpacity;
+    }
+
+    if (progressOpacity) {
+      progress.style.opacity = progressOpacity;
+    }
 
     this.setState({
       audioState: "ready",
@@ -125,7 +130,7 @@ class Embed extends Component {
             >
               <div className="embed__audio-player-top">
                 <PlayPauseButton
-                  color={audio.buttonColor}
+                  color={audio.accentColor}
                   handleTogglePlay={this.handleTogglePlay}
                   playing={this.state.playing}
                 />
@@ -143,8 +148,8 @@ class Embed extends Component {
                   <div
                     className="embed__loading-msg pulsate"
                     style={{
-                      color: audio.buttonColor
-                        ? audio.buttonColor
+                      color: audio.accentColor
+                        ? audio.accentColor
                         : "rgb(41, 213, 239)"
                     }}
                   >
@@ -157,8 +162,8 @@ class Embed extends Component {
                     <div
                       className="embed__loading-msg pulsate"
                       style={{
-                        color: audio.buttonColor
-                          ? audio.buttonColor
+                        color: audio.accentColor
+                          ? audio.accentColor
                           : "rgb(41, 213, 239)"
                       }}
                     >

@@ -4,6 +4,7 @@ import IconColorPicker from "./icons/IconColorPicker";
 
 const EmbedConfig = ({
   audio,
+  changeColor,
   colorElements,
   updateEmbedCode,
   updateIframeSrc,
@@ -31,29 +32,26 @@ const EmbedConfig = ({
           Color
         </span>
         <div className="expanded-embed__color-pickers">
-          {colorElements.map(colorElement => {
-            const { r, g, b, a } = colorElement.color;
-
-            return (
-              <div key={colorElement.title}>
-                <span className="expanded-embed__color-type">
-                  {colorElement.title}
-                </span>
-                <div className="expanded-embed__color-picker-container">
-                  <div
-                    className="expanded-embed__color-box"
-                    style={{ backgroundColor: `rgba(${r}, ${g}, ${b}, ${a})` }}
-                  />
-                  <input
-                    className="expanded-embed__color-code"
-                    type="text"
-                    value={`rgba(${r}, ${g}, ${b}, ${a})`}
-                  />
-                  <IconColorPicker />
-                </div>
+          {colorElements.map(colorElement => (
+            <div key={colorElement.title}>
+              <span className="expanded-embed__color-type">
+                {colorElement.title}
+              </span>
+              <div className="expanded-embed__color-picker-container">
+                <div
+                  className="expanded-embed__color-box"
+                  style={{ backgroundColor: colorElement.color }}
+                />
+                <input
+                  className="expanded-embed__color-code"
+                  onChange={changeColor.bind(this, colorElement.element)}
+                  type="text"
+                  value={colorElement.color}
+                />
+                <IconColorPicker />
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
         <div id="image-embed-container" className="row">
           <input
